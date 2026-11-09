@@ -58,6 +58,10 @@ if (figBad) problems.push(`figcaption 또는 role="img"가 빠진 그림: ${figB
 const o = (h.match(/<details[\s>]/g) || []).length, c = (h.match(/<\/details>/g) || []).length;
 if (o !== c) problems.push(`<details> 짝이 안 맞음: ${o} / ${c}`);
 
+// 5-2) 문자 인코딩: 서버가 charset을 안 보내면 브라우저가 한글을 다른 언어로 잘못 읽는다
+if (!/<meta charset="utf-8">/i.test(h.slice(0, 600))) problems.push('맨 앞에 <meta charset="utf-8">이 없음: 서버로 열면 한글이 깨진다');
+if (!/^<!doctype html>/i.test(h)) notes.push("<!doctype html>이 없음: 브라우저가 호환 모드로 그린다");
+
 // 6) 자리표시자, 외부 스크립트, 사진
 const left = h.match(/\{\{[^}]*\}\}/g) || [];
 if (left.length) problems.push(`채우지 않은 {{자리표시자}}: ${left.length}개 (예: ${left[0]})`);

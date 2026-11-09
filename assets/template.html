@@ -1,3 +1,7 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{보고서 이름 2~4단어}}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -90,7 +94,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .topbar .where{font-size:13px;color:var(--muted);flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 main{min-width:0;max-width:820px;width:100%}
-section.page{display:none}
+section.page{display:none;scroll-margin-top:100vh}
 section.page.on{display:block}
 .eyebrow{font-family:var(--f-mono);font-size:12.5px;color:var(--accent);letter-spacing:.04em;margin:0 0 6px}
 h1{font-size:clamp(26px,3.6vw,36px);line-height:1.28;margin:0 0 10px;text-wrap:balance}
@@ -354,7 +358,7 @@ function show(){
   where.textContent=`${idx+1} / ${pages.length} · ${pages[idx].dataset.title}`;
   const prev=pages[idx-1], next=pages[idx+1];
   pager.innerHTML=(prev?`<a class="prev" href="#${prev.id}"><small>← 이전</small>${prev.dataset.title}</a>`:"")+(next?`<a class="next" href="#${next.id}"><small>다음 →</small>${next.dataset.title}</a>`:"");
-  hideTip(); if(isTouch()) setToc(false); window.scrollTo(0,0);
+  hideTip(); if(isTouch()) setToc(false); window.scrollTo(0,0); requestAnimationFrame(()=>window.scrollTo(0,0));
 }
 window.addEventListener("hashchange",show);
 
