@@ -10,7 +10,7 @@ from note_visual import USED, ASSETS
 from fig import F                  # noqa: F401  SVG 그림 도우미
 def KEY(x): return f'<p class="gotit"><b>요점</b> {x}</p>'
 def embed_report(t,img_dir=None,who=None,widgets_js='',extra_keys=()):
-    """visual-kit CSS·JS, 사진(data URI), 위젯 JS를 마지막 <script> 앞에 넣는다. 필기·계산기는 넣지 않는다."""
+    """visual-kit CSS·JS, 사진(data URI), 위젯 JS를 템플릿 스크립트 뒤(문서 맨 끝)에 넣는다. 필기·계산기는 넣지 않는다."""
     t=t.replace('</style>',open(os.path.join(ASSETS,'visual-kit.css'),encoding='utf8').read()+'</style>',1)
     keys=set(re.findall(r'data-i="(\w+)"',t))|USED|set(extra_keys); IMG={}
     for k in sorted(keys):
@@ -19,4 +19,6 @@ def embed_report(t,img_dir=None,who=None,widgets_js='',extra_keys=()):
         else: print('사진 없음:',k)
     js='<script>window.IMG='+json.dumps(IMG)+';window.WHO='+json.dumps(who or {},ensure_ascii=False)+';</script><script>'+open(os.path.join(ASSETS,'visual-kit.js'),encoding='utf8').read()+'</script>'
     if widgets_js: js+='<script>'+widgets_js+'</script>'
-    i=t.rindex('<script'); return t[:i]+js+t[i:]
+    # 본문을 그리는 템플릿 스크립트를 먼저 돌리고, 용량이 큰 사진(data URI)은 맨 뒤에 둔다.
+    # 느린 회선에서도 사진을 다 받기 전에 글과 목차가 먼저 보인다.
+    i=t.rindex('</script>')+len('</script>'); return t[:i]+js+t[i:]

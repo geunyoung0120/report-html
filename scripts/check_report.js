@@ -8,7 +8,7 @@ const h = fs.readFileSync(file, "utf8");
 const problems = [], notes = [];
 
 // 1) 마지막 <script> 문법
-const js = h.split("<script>").pop().split("</script>")[0];
+const js = (h.split("<script>").map(s => s.split("</script>")[0]).find(s => s.includes("const GLOSS")) || "");
 try { new Function(js); } catch (e) { problems.push("JS 문법 오류: " + e.message); }
 
 // 2) 툴팁 용어
