@@ -1,0 +1,23 @@
+/* 공부 노트 시각 키트: 공용 함수, 사진 채우기, 위젯 시작, 인물 카드.
+   위젯 추가: NV.T.이름=['제목','설명']; NV.W.이름=(b,el)=>{...}  b는 위젯 본문 요소 */
+(function(){
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const fmt=(n,d=1)=>n.toLocaleString('ko-KR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const svgEsc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const chips=(host,list,cur,cb)=>{host.innerHTML='';list.forEach(([k,t])=>{const b=document.createElement('button');b.className='chip'+(k===cur?' on':'');b.type='button';b.textContent=t;b.onclick=()=>{$$('.chip',host).forEach(x=>x.classList.remove('on'));b.classList.add('on');cb(k)};host.appendChild(b)})};
+const btn=(host,t,cb)=>{const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.onclick=cb;host.appendChild(b);return b};
+const slider=(host,label,min,max,step,val,unit,cb)=>{const l=document.createElement('label');l.className='sl';l.innerHTML=`<span>${label}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${val}"><output></output>`;const i=$('input',l),o=$('output',l);const up=()=>{o.textContent=(+i.value).toLocaleString('ko-KR')+unit;cb(+i.value)};i.oninput=up;host.appendChild(l);o.textContent=(+val).toLocaleString('ko-KR')+unit;return i};
+const W={};const T={};
+const stepper=(b,seq,render)=>{let i=-1;const c=document.createElement('div');c.className='chips';b.appendChild(c);const go=k=>{i=k;render(i)};btn(c,'처음',()=>go(-1));btn(c,'이전',()=>go(Math.max(-1,i-1)));btn(c,'다음 단계 ▶',()=>go(Math.min(seq-1,i+1)));go(-1);return{go,get i(){return i}}};
+const sorter=(b,items,buckets)=>{b.innerHTML='<div class="list"></div><div class="res"></div>';const L=$('.list',b);let done=0,right=0;items.forEach(([t,a,why])=>{const row=document.createElement('div');row.className='sortrow';row.innerHTML=`<span>${t}</span><div class="chips"></div>`;const c=$('.chips',row);buckets.forEach(k=>{const x=btn(c,k,()=>{$$('.chip',c).forEach(y=>y.disabled=true);done++;if(k===a){x.classList.add('right');right++}else{x.classList.add('wrong');$$('.chip',c).find(y=>y.textContent===a).classList.add('right')}$('.res',b).textContent=`${t}: ${why}  (${right}/${done} 맞음)`})});L.appendChild(row)});$('.res',b).textContent='각 줄에서 하나를 고르세요.'};
+window.NV={$,$$,fmt,svgEsc,chips,btn,slider,stepper,sorter,W,T};
+/* 공통 */
+const WHO=window.WHO||{};
+document.addEventListener('click',e=>{const old=document.querySelector('.figzoom');if(old){old.remove();return}const s=e.target.closest&&e.target.closest('.sbs-f svg');if(!s)return;const o=document.createElement('div');o.className='figzoom';o.setAttribute('role','dialog');o.innerHTML='<div class="fig"></div>';o.firstChild.appendChild(s.cloneNode(true));document.body.appendChild(o)});addEventListener('keydown',e=>{if(e.key==='Escape'){const o=document.querySelector('.figzoom');if(o)o.remove()}});
+function tightFigs(){document.querySelectorAll('figure.fig svg').forEach(s=>{const sec=s.closest('section.page'),hid=sec&&getComputedStyle(sec).display==='none';if(hid)sec.style.cssText='display:block;visibility:hidden;position:absolute';try{const b=s.getBBox();if(b.width>0&&b.height>0){const p=6;s.setAttribute('viewBox',`${b.x-p} ${b.y-p} ${b.width+2*p} ${b.height+2*p}`);const g=s.closest('.sbs-in');if(g)g.classList.toggle('big',b.width>620)}}catch(e){}if(hid)sec.style.cssText=''})}
+function boot(){tightFigs();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(tightFigs);$$('img[data-i]').forEach(i=>{const u=window.IMG[i.dataset.i];if(u)i.src=u});
+$$('.wg').forEach(el=>{const k=el.dataset.w,t=T[k]||[k,''];el.innerHTML=`<div class="wg-top"><span class="wg-tag">직접 해보기</span><b>${t[0]}</b></div><p class="wg-sub">${t[1]}</p><div class="wg-body"></div>`;try{W[k]($('.wg-body',el),el)}catch(e){console.error('widget',k,e);el.remove()}});
+const c=document.createElement('div');c.className='whocard';document.body.appendChild(c);const show=e=>{const p=e.currentTarget,k=p.dataset.who,w=WHO[k];if(!w)return;c.innerHTML=`<img src="${window.IMG['a_'+k]||''}" alt=""><b>${w[0]}</b><i>${w[1]}</i><div>${w[2]}</div>`;c.style.display='block';const r=p.getBoundingClientRect(),H=c.offsetHeight;c.style.left=Math.min(innerWidth-246,Math.max(8,r.left))+'px';c.style.top=(r.bottom+H+12<innerHeight?r.bottom+6:Math.max(8,r.top-H-6))+'px'},hide=()=>c.style.display='none';
+$$('.pc').forEach(p=>{p.onmouseenter=show;p.onmouseleave=hide;p.onfocus=show;p.onblur=hide;p.onclick=e=>{c.style.display==='block'?hide():show(e)}});addEventListener('scroll',hide,{passive:true})}
+document.readyState==='loading'?addEventListener('DOMContentLoaded',boot):boot();
+})();
